@@ -1,53 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-body {
-    font-family: Segoe UI;
-    text-align: center;
-    margin: 0;
-    background: #ffffff;
-}
-
-.container {
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #f5f5f5;
-}
-
-.date {
-    font-size: 22px;
-    margin-bottom: 15px;
-}
-
-.row {
-    font-size: 16px;
-    margin: 5px 0;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-    <div id="date" class="date"></div>
-    <div class="row">Week Number: <strong id="week"></strong></div>
-    <div class="row">KT: <strong id="day"></strong></div>
-</div>
-
 <script>
 function getWeekNumber(d) {
     d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
     d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
     var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
     return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-}
-
-function getDayOfYear(d) {
-    var start = new Date(d.getFullYear(), 0, 0);
-    return Math.floor((d - start) / 86400000);
 }
 
 function getWeekCommencing(d) {
@@ -58,17 +14,45 @@ function getWeekCommencing(d) {
     return date;
 }
 
+function getDayName(d) {
+    return d.toLocaleDateString('en-GB', { weekday: 'long' });
+}
+
+function getWorkingDaysRemaining(d) {
+    var year = d.getFullYear();
+    var month = d.getMonth();
+
+    var current = new Date(d);
+    var end = new Date(year, month + 1, 0);
+
+    var count = 0;
+
+    while (current <= end) {
+        var day = current.getDay();
+        if (day !== 0 && day !== 6) {
+            count++;
+        }
+        current.setDate(current.getDate() + 1);
+    }
+
+    return count;
+}
+
 var today = new Date();
 
+// WC Date
 document.getElementById("date").innerText =
-    today.toLocaleDateString('en-GB');
+    getWeekCommencing(today).toLocaleDateString('en-GB');
 
+// Week number
 document.getElementById("week").innerText =
     getWeekNumber(today);
 
+// Day name
 document.getElementById("day").innerText =
-    getDayOfYear(today);
-</script>
+    getDayName(today);
 
-</body>
-</html>
+// Working days left
+document.getElementById("working").innerText =
+    getWorkingDaysRemaining(today);
+</script>
