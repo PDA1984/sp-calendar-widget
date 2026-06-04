@@ -5,27 +5,57 @@
 
 <style>
 body {
-    font-family: Segoe UI;
+    font-family: Segoe UI, Arial, sans-serif;
     text-align: center;
     margin: 0;
-    background: #ffffff;
+    background: transparent;
 }
 
+/* Glass container */
 .container {
     padding: 20px;
-    border-radius: 8px;
-    background: #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-top: 5px solid #0050A0;
+    width: 260px;
+    margin: auto;
 }
 
 .date {
     font-size: 22px;
     margin-bottom: 15px;
+    color: #0050A0;
+    font-weight: 600;
 }
 
 .row {
     font-size: 16px;
-    margin: 5px 0;
+    margin: 8px 0;
+}
+
+.row strong {
+    color: #0050A0;
+}
+
+/* Progress bar */
+.progress-container {
+    margin-top: 12px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 10px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 10px;
+    width: 0%;
+    background: #0050A0;
+    border-radius: 10px;
+    transition: width 0.5s ease;
 }
 </style>
 
@@ -38,6 +68,11 @@ body {
     <div class="row">KW: <strong id="week"></strong></div>
     <div class="row">Day: <strong id="day"></strong></div>
     <div class="row">WD Left: <strong id="working"></strong></div>
+
+    <!-- Progress bar -->
+    <div class="progress-container">
+        <div id="progressBar" class="progress-bar"></div>
+    </div>
 </div>
 
 <script>
@@ -60,6 +95,21 @@ function getDayName(d) {
     return d.toLocaleDateString('en-GB', { weekday: 'long' });
 }
 
+function getWorkingDaysInMonth(d) {
+    var year = d.getFullYear();
+    var month = d.getMonth();
+    var date = new Date(year, month, 1);
+    var end = new Date(year, month + 1, 0);
+
+    var count = 0;
+    while (date <= end) {
+        var day = date.getDay();
+        if (day !== 0 && day !== 6) count++;
+        date.setDate(date.getDate() + 1);
+    }
+    return count;
+}
+
 function getWorkingDaysRemaining(d) {
     var year = d.getFullYear();
     var month = d.getMonth();
@@ -68,35 +118,34 @@ function getWorkingDaysRemaining(d) {
     var end = new Date(year, month + 1, 0);
 
     var count = 0;
-
     while (current <= end) {
         var day = current.getDay();
-        if (day !== 0 && day !== 6) {
-            count++;
-        }
+        if (day !== 0 && day !== 6) count++;
         current.setDate(current.getDate() + 1);
     }
-
     return count;
 }
 
 var today = new Date();
 
-// Week Commencing date
+// Set values
 document.getElementById("date").innerText =
     getWeekCommencing(today).toLocaleDateString('en-GB');
 
-// Week number
 document.getElementById("week").innerText =
     getWeekNumber(today);
 
-// Day name
 document.getElementById("day").innerText =
     getDayName(today);
 
-// Working days remaining in month
-document.getElementById("working").innerText =
-    getWorkingDaysRemaining(today);
+var workingLeft = getWorkingDaysRemaining(today);
+var totalWorking = getWorkingDaysInMonth(today);
+
+document.getElementById("working").innerText = workingLeft;
+
+// Calculate progress
+var progress = ((totalWorking - workingLeft) / totalWorking) * 100;
+document.getElementById("progressBar").style.width = progress + "%";
 </script>
 
 </body>
